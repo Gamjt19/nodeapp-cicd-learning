@@ -14,7 +14,29 @@ jobs:
       - name: set node
         uses: actions/setup-node@v7
         with:
-            node-version: 24
+            node-version: 20
             package-manager-cache: false # Disable automatic npm caching if not required
       - run: npm ci
       - run: npm test
+  
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: chekout code
+        uses: actions/checkout@v4
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+       
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      -
+        name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/project-49-cicd:latest
