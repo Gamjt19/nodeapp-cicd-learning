@@ -4,7 +4,8 @@
     "description": "Node.js application for GitHub Actions CI/CD training",
     "main": "app.js",
     "scripts": {
-        "start": "node app.js"
+        "start": "node app.js",
+        "test": "node --check app.js"
     },
     "engines": {
         "node": ">=20"
