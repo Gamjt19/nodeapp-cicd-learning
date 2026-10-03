@@ -39,4 +39,4 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/project-49-cicd:latest
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/project-49-cicd:${{github.sha}}

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: project-49
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: project-49
+
+  template:
+    metadata:
+      labels:
+        app: project-49
+
+    spec:
+      containers:
+        - name: project-49
+          image: gamjt/project-49-cicd:latest
+          ports:
+            - containerPort: 3000

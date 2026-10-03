@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 49 - DevOps CI/CD Ops-Command & Pipeline Defender</title>
+    <meta name="description" content="Node.js CI/CD Pipeline project running on Docker with an interactive Pipeline Defender arcade game and real-time server telemetry.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="header-container">
+            <div class="brand">
+                <span class="brand-icon">⚡</span>
+                <div>
+                    <h1 class="brand-title">PROJECT 49</h1>
+                    <div class="brand-subtitle">CI/CD OPS-COMMAND &bull; AUTOMATION PIPELINE</div>
+                </div>
+            </div>
+
+            <div class="header-badges">
+                <span class="badge badge-success">
+                    <span class="status-indicator online"></span>
+                    BUILD: PASSING
+                </span>
+                <span class="badge badge-info">
+                    🐳 DOCKER: CONTAINERIZED
+                </span>
+                <span class="badge badge-neon">
+                    <span id="pingBadge" class="status-indicator online"></span>
+                    <span id="metricLatency">--ms</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Live Server Telemetry Bar -->
+        <section class="telemetry-grid">
+            <div class="telemetry-card">
+                <span class="metric-label">Server Uptime</span>
+                <span class="metric-value" id="metricUptime">Loading...</span>
+            </div>
+            <div class="telemetry-card">
+                <span class="metric-label">Memory Heap / RSS</span>
+                <span class="metric-value" id="metricMemory">-- MB</span>
+            </div>
+            <div class="telemetry-card">
+                <span class="metric-label">Runtime Engine</span>
+                <span class="metric-value" id="metricNodeVer">Node.js 20</span>
+            </div>
+            <div class="telemetry-card">
+                <span class="metric-label">HTTP Requests Handled</span>
+                <span class="metric-value" id="metricRequests">0</span>
+            </div>
+        </section>
+
+        <!-- Arcade Game Centerpiece -->
+        <section class="game-section">
+            <div class="game-header">
+                <div class="game-title-group">
+                    <h2>PIPELINE DEFENDER</h2>
+                    <p>Eliminate syntax bugs, merge conflicts, and server outages before they hit production!</p>
+                </div>
+                <div class="game-actions">
+                    <button id="btnMute" class="btn">🔊 Audio ON</button>
+                    <button id="btnPause" class="btn">⏸ Pause</button>
+                    <button id="btnNukeMobile" class="btn btn-danger">💣 Rollback Nuke</button>
+                </div>
+            </div>
+
+            <!-- In-game HUD -->
+            <div class="game-hud">
+                <div class="hud-item">
+                    <span class="hud-label">SCORE:</span>
+                    <span id="scoreVal" class="hud-value">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">HIGH SCORE:</span>
+                    <span id="highScoreVal" class="hud-value">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">DEPLOY WAVE:</span>
+                    <span id="waveVal" class="hud-value">1</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">HEALTH:</span>
+                    <span id="hpVal" class="hud-value">❤️❤️❤️</span>
+                </div>
+                <div class="hud-item">
+                    <span id="shieldStatus" class="badge badge-neon">SHIELD: ACTIVE</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">ROLLBACK BUKES [B]:</span>
+                    <span id="nukeVal" class="hud-value">1</span>
+                </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="canvas-container">
+                <canvas id="gameCanvas"></canvas>
+
+                <!-- Start Overlay -->
+                <div id="startOverlay" class="game-overlay">
+                    <div class="overlay-content">
+                        <h3 class="overlay-title">PIPELINE DEFENDER</h3>
+                        <p class="overlay-desc">
+                            You are the Container Deploy Core. Hostile bugs and merge conflicts are swarming the production cluster!
+                        </p>
+                        <div class="instructions-grid">
+                            <div class="instruction-item">
+                                <span class="kbd">A</span> <span class="kbd">D</span> or <span class="kbd">←</span> <span class="kbd">→</span>
+                                <span>Move Ship</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="kbd">SPACE</span> or <span>Mouse / Tap</span>
+                                <span>Deploy Lasers</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="kbd">B</span> or <span>Nuke Btn</span>
+                                <span>Rollback Nuke</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="kbd">P</span>
+                                <span>Pause Game</span>
+                            </div>
+                        </div>
+                        <button id="btnStart" class="btn btn-primary" style="padding: 0.8rem 2.2rem; font-size: 1rem;">
+                            🚀 LAUNCH DEPLOYMENT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Game Over Overlay -->
+                <div id="gameOverOverlay" class="game-overlay" style="display: none;">
+                    <div class="overlay-content">
+                        <h3 class="overlay-title gameover">OUTAGE DETECTED</h3>
+                        <p class="overlay-desc">
+                            Your container instance was overwhelmed by unhandled exceptions!
+                        </p>
+                        <div style="font-family: var(--font-mono); margin: 0.5rem 0;">
+                            <div>Final Score: <strong id="finalScoreVal" style="color: var(--cyan);">0</strong></div>
+                            <div>Personal Best: <strong id="bestScoreVal" style="color: var(--emerald);">0</strong></div>
+                        </div>
+                        <button id="btnRestart" class="btn btn-primary" style="padding: 0.8rem 2rem; font-size: 1rem;">
+                            🔄 REDEPLOY HOTFIX
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive DevOps CI/CD Terminal & Architecture -->
+        <section class="terminal-section">
+            <div class="tab-header">
+                <div class="tab-nav">
+                    <button class="tab-btn active" data-tab="tabPipeline">🚀 GitHub Actions Pipeline</button>
+                    <button class="tab-btn" data-tab="tabArchitecture">📐 Architecture Blueprint</button>
+                    <button class="tab-btn" data-tab="tabTelemetry">📊 REST API Telemetry</button>
+                </div>
+                <button id="btnRunPipeline" class="btn btn-primary">
+                    ⚡ Trigger CI/CD Simulation
+                </button>
+            </div>
+
+            <!-- Tab 1: Pipeline Simulator -->
+            <div id="tabPipeline" class="tab-panel active">
+                <div class="pipeline-visualizer">
+                    <div class="pipeline-step">
+                        <div class="step-circle">🚀</div>
+                        <div class="step-label">Push (main)</div>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="step-circle">📥</div>
+                        <div class="step-label">Checkout</div>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="step-circle">⚙️</div>
+                        <div class="step-label">Node:20</div>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="step-circle">📦</div>
+                        <div class="step-label">npm ci</div>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="step-circle">🧪</div>
+                        <div class="step-label">npm test</div>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="step-circle">🔑</div>
+                        <div class="step-label">Docker Login</div>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="step-circle">🐳</div>
+                        <div class="step-label">Build & Push</div>
+                    </div>
+                </div>
+
+                <div class="progress-track">
+                    <div id="pipelineProgressBar" class="progress-bar"></div>
+                </div>
+
+                <div class="terminal-window">
+                    <div class="terminal-topbar">
+                        <div class="window-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <span class="terminal-title">bash - runner@ubuntu-latest:~/.github/workflows/main.yml</span>
+                    </div>
+                    <div id="terminalLogs" class="terminal-body">
+                        <div class="log-line system">[SYSTEM] GitHub Actions runner ready. Click "Trigger CI/CD Simulation" to test pipeline steps.</div>
+                        <div class="log-line info">[STATUS] Dockerfile configured: FROM node:20 -> EXPOSE 3000 -> CMD npm start</div>
+                        <div class="log-line success">[READY] Local HTTP server active on port 3000. All routes healthy.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Architecture Blueprint -->
+            <div id="tabArchitecture" class="tab-panel">
+                <div class="arch-diagram">
+                    <div class="arch-card">
+                        <div class="arch-card-header">
+                            <span>1. SOURCE CODE</span>
+                        </div>
+                        <p>Developer pushes commits to the <code>main</code> branch on GitHub repository <code>Gamjt19/nodeapp-cicd-learning</code>.</p>
+                        <div class="code-snippet">git push origin main</div>
+                    </div>
+
+                    <div class="arch-card">
+                        <div class="arch-card-header">
+                            <span>2. CI: BUILD & TEST</span>
+                        </div>
+                        <p>GitHub Actions spins up an Ubuntu VM runner, sets up Node.js 20, runs clean install and test verification.</p>
+                        <div class="code-snippet">npm ci && npm test</div>
+                    </div>
+
+                    <div class="arch-card">
+                        <div class="arch-card-header">
+                            <span>3. CD: DOCKER BUILD & PUSH</span>
+                        </div>
+                        <p>Logs into Docker Hub via encrypted secrets, builds multi-platform image with Buildx, tags with commit SHA, and pushes to registry.</p>
+                        <div class="code-snippet">docker build-push-action@v7</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: REST API Telemetry -->
+            <div id="tabTelemetry" class="tab-panel">
+                <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <a href="/api/status" target="_blank" class="btn">🔗 /api/status</a>
+                    <a href="/api/ping" target="_blank" class="btn">🔗 /api/ping</a>
+                    <a href="/api/cicd" target="_blank" class="btn">🔗 /api/cicd</a>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6;">
+                    The Node.js backend serves lightweight JSON endpoints without external frameworks, making it optimal for Docker containers, Kubernetes probes (liveness / readiness), and low-memory footprint deployments.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div>PROJECT 49 &bull; CI/CD AUTOMATION LAB &bull; RUNNING ON NODE.JS 20 & DOCKER</div>
+        <div class="footer-links">
+            <a href="https://github.com/Gamjt19/nodeapp-cicd-learning" target="_blank" rel="noopener">GitHub Repository</a>
+            <span>&bull;</span>
+            <a href="/api/status" target="_blank">Health Check API</a>
+            <span>&bull;</span>
+            <a href="https://hub.docker.com" target="_blank" rel="noopener">Docker Hub</a>
+        </div>
+    </footer>
+
+    <!-- Game & Telemetry Scripts -->
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+    <script src="terminal.js"></script>
+</body>
+</html>
